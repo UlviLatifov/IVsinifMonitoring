@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitorinq İmtahanı – 7-ci Sinif</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #2b4fff;
+    --primary-dark: #1a35d8;
+    --accent: #ff6b35;
+    --success: #22c55e;
+    --error: #ef4444;
+    --text: #1a1f36;
+    --muted: #6b7280;
+    --border: #dde3f0;
+    --shadow: 0 4px 24px rgba(43,79,255,0.10);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, #2b4fff 0%, #6a3de8 100%);
+    color: #fff;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 2px 16px rgba(43,79,255,0.25);
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: .3px; }
+  #timer-box {
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+    padding: 6px 18px;
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    min-width: 110px;
+    text-align: center;
+    transition: background .3s;
+  }
+  #timer-box.warning { background: rgba(255,107,53,0.5); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+  #progress-wrap { display: flex; align-items: center; gap: 10px; font-size: .85rem; }
+  #progress-count { font-weight: 700; opacity: .9; }
+
+  /* ===== MAIN LAYOUT ===== */
+  main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  /* ===== SECTION TITLE ===== */
+  .section-title {
+    display: flex; align-items: center; gap: 12px;
+    margin: 32px 0 18px;
+  }
+  .section-title .badge {
+    background: var(--primary);
+    color: #fff; border-radius: 8px;
+    padding: 4px 14px; font-size: .8rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .section-title h2 { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+
+  /* ===== TEXT PASSAGE ===== */
+  .passage {
+    background: #fff;
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    font-family: 'Merriweather', serif;
+    font-size: .92rem;
+    line-height: 1.85;
+    box-shadow: var(--shadow);
+  }
+  .passage .passage-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    color: var(--primary); margin-bottom: 12px;
+    text-align: center;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .q-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 22px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1.5px solid transparent;
+    transition: border .2s, box-shadow .2s;
+  }
+  .q-card.answered { border-color: var(--primary); }
+  .q-card .q-num {
+    font-size: .72rem; font-weight: 800;
+    color: var(--primary); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .q-card .q-text {
+    font-weight: 700; font-size: .97rem;
+    margin-bottom: 14px; line-height: 1.5;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:560px){ .options { grid-template-columns: 1fr; } }
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #f5f7ff; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 9px 14px;
+    cursor: pointer; transition: all .15s;
+    font-size: .9rem; line-height: 1.4;
+    user-select: none;
+  }
+  .opt:hover { background: #eaefff; border-color: var(--primary); }
+  .opt input[type=radio] { display:none; }
+  .opt-letter {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .75rem;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .opt.selected { background: #e8edff; border-color: var(--primary); }
+  .opt.selected .opt-letter { background: var(--primary); color: #fff; }
+  /* Result states */
+  .opt.correct-ans { background: #dcfce7 !important; border-color: var(--success) !important; }
+  .opt.correct-ans .opt-letter { background: var(--success) !important; color:#fff !important; }
+  .opt.wrong-ans { background: #fee2e2 !important; border-color: var(--error) !important; }
+  .opt.wrong-ans .opt-letter { background: var(--error) !important; color:#fff !important; }
+
+  /* TABLE for question 49-51 */
+  .q-table { width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:.88rem; }
+  .q-table th { background:var(--primary); color:#fff; padding:6px 10px; font-weight:700; }
+  .q-table td { border:1px solid var(--border); padding:5px 10px; }
+  .q-table tr:nth-child(even) td { background:#f5f7ff; }
+
+  /* ===== BOTTOM BAR ===== */
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1.5px solid var(--border);
+    padding: 12px 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.07);
+    z-index: 99;
+  }
+  .progress-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background: linear-gradient(90deg,var(--primary),var(--accent)); border-radius:99px; transition:width .4s; }
+  #submit-btn {
+    background: var(--primary); color:#fff;
+    border:none; border-radius:10px;
+    padding: 10px 28px; font-size: 1rem;
+    font-weight: 800; cursor: pointer;
+    transition: background .2s, transform .1s;
+    font-family: 'Nunito',sans-serif;
+  }
+  #submit-btn:hover { background: var(--primary-dark); transform:scale(1.03); }
+
+  /* ===== RESULT MODAL ===== */
+  #result-modal {
+    display:none; position:fixed; inset:0;
+    background:rgba(20,25,60,.65); z-index:200;
+    align-items:center; justify-content:center;
+  }
+  #result-modal.show { display:flex; }
+  .result-box {
+    background:#fff; border-radius:20px;
+    padding:36px 32px 28px; max-width:460px; width:90%;
+    text-align:center; box-shadow:0 12px 48px rgba(43,79,255,.22);
+    animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from{transform:scale(.7);opacity:0} to{transform:scale(1);opacity:1} }
+  .result-emoji { font-size:3.5rem; margin-bottom:10px; }
+  .result-box h2 { font-size:1.5rem; font-weight:900; margin-bottom:6px; }
+  .result-score { font-size:3rem; font-weight:900; color:var(--primary); margin:10px 0; }
+  .result-detail { color:var(--muted); font-size:.95rem; margin-bottom:20px; }
+  .result-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:18px 0 22px; }
+  .stat-box { background:#f5f7ff; border-radius:12px; padding:12px 6px; }
+  .stat-box .sv { font-size:1.5rem; font-weight:900; }
+  .stat-box .sl { font-size:.75rem; color:var(--muted); margin-top:2px; }
+  .stat-box.green .sv { color:var(--success); }
+  .stat-box.red .sv { color:var(--error); }
+  .stat-box.blue .sv { color:var(--primary); }
+  #retry-btn {
+    background:var(--primary); color:#fff; border:none;
+    border-radius:10px; padding:12px 32px; font-size:1rem;
+    font-weight:800; cursor:pointer; font-family:'Nunito',sans-serif;
+    transition:background .2s;
+  }
+  #retry-btn:hover { background:var(--primary-dark); }
+
+  /* ===== START SCREEN ===== */
+  #start-screen {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; min-height:80vh; text-align:center; padding:20px;
+  }
+  .start-icon { font-size:4rem; margin-bottom:16px; }
+  #start-screen h1 { font-size:1.8rem; font-weight:900; color:var(--primary); margin-bottom:8px; }
+  #start-screen p { color:var(--muted); font-size:1rem; margin-bottom:28px; line-height:1.6; max-width:400px; }
+  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:32px; width:100%; max-width:440px; }
+  .info-card { background:#fff; border-radius:12px; padding:14px 10px; box-shadow:var(--shadow); }
+  .info-card .iv { font-size:1.4rem; font-weight:900; color:var(--primary); }
+  .info-card .il { font-size:.78rem; color:var(--muted); margin-top:3px; }
+  #start-btn {
+    background:linear-gradient(135deg,var(--primary),#6a3de8);
+    color:#fff; border:none; border-radius:12px;
+    padding:14px 48px; font-size:1.1rem; font-weight:900;
+    cursor:pointer; font-family:'Nunito',sans-serif;
+    box-shadow:0 6px 24px rgba(43,79,255,.3);
+    transition:transform .15s, box-shadow .15s;
+  }
+  #start-btn:hover { transform:scale(1.04); box-shadow:0 8px 30px rgba(43,79,255,.4); }
+
+  #test-area { display:none; }
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <div class="start-icon">📚</div>
+  <h1>Monitorinq İmtahanı</h1>
+  <p>Azərbaycan dili və Riyaziyyat fənlərindən 60 sual. Uğurlar!</p>
+  <div class="info-grid">
+    <div class="info-card"><div class="iv">60</div><div class="il">Sual</div></div>
+    <div class="info-card"><div class="iv">150</div><div class="il">Dəqiqə</div></div>
+    <div class="info-card"><div class="iv">2</div><div class="il">Fənn</div></div>
+  </div>
+  <button id="start-btn" onclick="startTest()">İmtahana Başla 🚀</button>
+</div>
+
+<!-- TEST AREA -->
+<div id="test-area">
+  <header>
+    <h1>📝 Monitorinq İmtahanı</h1>
+    <div id="progress-wrap">
+      <span id="progress-count">0/60</span>
+    </div>
+    <div id="timer-box">2:30:00</div>
+  </header>
+
+  <main id="questions-main"></main>
+
+  <div class="bottom-bar">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+    <button id="submit-btn" onclick="submitTest()">Təslim Et ✓</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div id="result-modal">
+  <div class="result-box">
+    <div class="result-emoji" id="res-emoji">🎉</div>
+    <h2 id="res-title">Nəticə</h2>
+    <div class="result-score" id="res-score"></div>
+    <div class="result-detail" id="res-detail"></div>
+    <div class="result-stats">
+      <div class="stat-box green"><div class="sv" id="res-correct">0</div><div class="sl">Düzgün</div></div>
+      <div class="stat-box red"><div class="sv" id="res-wrong">0</div><div class="sl">Səhv</div></div>
+      <div class="stat-box blue"><div class="sv" id="res-blank">0</div><div class="sl">Boş</div></div>
+    </div>
+    <button id="retry-btn" onclick="retryTest()">Yenidən Başla 🔄</button>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const passage1 = `<div class="passage-title">Padşah və oğulları</div>
+Qədim zamanlarda bir padşah yaşayırdı. Onun üç oğlu var idi. Oğullarından biri onun yerinə taxta keçməli idi. Padşah seçim etməkdə çətinlik çəkirdi. Oğullarının üçü də ağıllı və cəsarətli idi. O, çox düşündükdən sonra müdrik bir qocadan məsləhət aldı.
+Günlərin bir günü padşah oğullarını çağırdı və hər birinə bir kisə toxum verib dedi: "Oğullarım, mən uzaq səfərə çıxıram, üç il sonra qayıdacağam. Mən qayıdanda toxumları qaytararsınız. Kim toxumları yaxşı saxlasa, mənim yerimə taxta o çıxacaq. Sandığın ağzına da qıfıl vurum ki, toxumları heç kim oğurlamasın." Ortancıl oğul: "Atam qayıdanda təzə toxum alaram, atama qaytararam" – deyə toxumları satdı. Kiçik oğul isə toxumları sarayın bağçasında əkdi. Bir müddətdən sonra toxumlardan rəngbərəng çiçəklər açdı.
+Ay dolandı, il keçdi, vaxt tamam oldu. Padşah səfərdən qayıtdı. Birinci oğul sandığı açdı və orada gizlətdiyi toxumları atasına verdi. Padşah toxumlara baxıb dedi: "Bunlar mənim verdiyim toxumlar deyil. Onlar çürüyüb. Bu toxumlarda zərrə qədər həyat yoxdur!" İkinci oğul bazardan təzə toxum alıb atasına verdi. Padşah toxumları görən kimi təəssüfləndi: "Bunlar da mənim verdiyim toxumlar deyil. Ancaq sən böyük qardaşından yaxşı fikirləşmişsən." Padşah qəm dəryasına qərq olmuşdu. Üçüncü oğul ona yaxınlaşdı. Atasını sarayın bağçasına apardı. Burada gül gülü çağırırdı, bülbül bülbülü. Kiçik oğul dedi: "Ata, bu çiçəklər sənin verdiyin toxumlardan becərmişəm. Bir azdan çiçəklər toxum tökəcək. Məndə onları sənə geri qaytaracağam." Padşah bir söz deməsə də, çox sevinirdi.`;
+
+const passage2 = `<div class="passage-title">Akvarium qızılbalıqları</div>
+Akvariumlardan adətən dekorativ məqsədlə evlərin, ofislərin bəzədilməsində istifadə olunur. Akvariumlarda xırda, əlvan rəngli, qeyri-adi formalı balıqlar saxlanılır. Belə balıq növlərindən ən məşhuru dekorativ qızılbalıqlardır.
+Qızılbalığa tabii şəraitdə bir çox ölkələrdə rast gəlinir. Təxminən 1500 il əvvəl Çin balıqçıları ilk dəfə olaraq bu balığın dekorativ növlərini yaradıblar. Onları süni göllərdə və hovuzlarda saxlayıblar. Sonralar kiçik şüşə akvariumlardan istifadə etməyə başlayıblar. Çindən Yaponiyaya gətirilən qızılbalıqlar buradan Amerika və Avropaya yol alıb. Deyilənə görə, Yaponiya imperatoruna amerikalı bir hərbçi iki şələquyruq qızılbalıq hədiyyə edib. Hərbçi onları özü ilə Amerikaya aparır. Orada qızılbalıqların çoxalmasına nail olduqdan sonra onları satmağa başlayır.
+Belə bir fikir var ki, akvarium qızılbalığının cəmi üç saniyəlik yaddaşı var. Bu fikrin necə yarandığı bəlli deyil, amma onun belə geniş yayılmasında "Nemonun axtarışında" cizgi filminin rolu böyükdür. Belə ki, bu filmin qəhrəmanlarından olan Dori adlı balıq məhz hafizəsiz olmasına görə çox təhlükəli vəziyyətlərə düşür.
+2003-cü ildə ABŞ-ın Plimut Universitetində tədqiqatçılar balıq huşsuzluğunun həqiqətə nə dərəcədə uyğun olduğunu yoxlamaq qərarına gəldilər. Bunun üçün akvariumun bir küncünə səs siqnalı yerləşdirdilər. Səs siqnalını gün ərzində eyni vaxtda işə salıb, akvariumun eyni küncündə balıqlara yem verdilər. Bununla qızılbalıqlar akvariumun eyni küncündə yemək yeməyi və siqnal səsi eşidən kimi həmin yerə toplaşmağı öyrəndilər. Beş ay fasilə verilib. Yenidən siqnal səsi eşidən qızılbalıqlar "yemək masasının" başına yığıldılar.
+Sonralar eksperimentlər Avstraliyanın elm mərkəzlərində rəngli labirintlərlə həyata keçirilib. Qızılbalıqları bir müddət dolaşıq yollara malik labirintdə saxladıqdan sonra başqa akvariuma keçiriblər. Bir müddət sonra labirintə qaytarılan qızılbalıqların davranışı çox maraqlı olub. Belə ki, onlar labirinin rəngli və dolaşıq yollarında hərəkət etməkdə çətinlik çəkməyiblər. Bununla da qızılbalıqların rəngləri və məkanı uzun müddət yadda saxladıqları aşkar edilib.
+Beləliklə, cizgi filmlərində olan hər məlumatı həqiqət kimi qəbul etmək düzgün olmaz.`;
+
+const questions = [
+  // AZ DİLİ - Padşah və oğulları (1-15)
+  {id:1, s:"1. Mətndə hansı suala cavab yoxdur?", opts:["Padşah oğullarına nə tapşırdı?","Oğullar tapşırığı yerinə yetirmək üçün nə etdilər?","Padşah hansı ölkəyə səfər etdi?","Hansı oğlun toxum saxlaması padşahın xoşuna gəldi?"], ans:"C"},
+  {id:2, s:"2. Padşah çətinliklə qarşılaşmışdı, çünki...", opts:["Oğulları arasında mübahisə yaranmışdı.","Hansı oğlunun taxta çıxacağına qərar verə bilmirdi.","Artıq ölkəni idarə edə bilmirdi.","Ölkənin əhalisi padşahdan narazı idi."], ans:"B"},
+  {id:3, s:"3. Hansı hərəkət qardaşlardan heç birinə aid deyil?", opts:["Sandıqda saxladı.","Bağçada əkdi.","Üyüdüb un elədi.","Satıb təzəsini aldı."], ans:"C"},
+  {id:4, s:"4. Müdrik adam padşaha nə məsləhət gördü?", opts:["Oğullarına bir torba toxum verib ondan necə istifadə edəcəklərini sınamağı","Ən çox etibar etdiyi oğlunu öz yerinə keçirməyi","Oğullarının hər birini bir günlük taxta keçirib sınamağı","Ölkəni oğullarına tapşırıb səfərə getməyi."], ans:"A"},
+  {id:5, s:"5. Hansı fikir kiçik qardaşın xarakterinə uyğundur?", opts:["Artıq tamah baş yarar","İnsana arxadır onun kamalı, bilməz.","Ehtiyat igidin yaraşığıdır","Adam özünə edəni, el yığılsa, edə bilməz."], ans:"C"},
+  {id:6, s:"6. Mətni sonunda padşah nəyə sevindi?", opts:["Nəhayət, bağçaya qulluq edəcək adam tapmışdı.","Sarayın bağçası gülüstana çevrilmişdi.","Axır ki, verdiyi toxumları geri almışdı.","Artıq ölkəni kimin idarə edəcəyini bilirdi."], ans:"D"},
+  {id:7, s:"7. Hansı bənddə səbəb-nəticə əlaqəsi düzgün göstərilmişdir?", opts:["Padşah seçim etməkdə çətinlik çəkirdi → Dünyagörmüş yaşlı bir adamdan məsləhət aldı.","Padşah bağçasında güllər əkmək istəyirdi → Oğullarına toxum verdi.","Böyük oğul toxumları sandıqda saxladı → Toxumları oğurladılar.","Kiçik oğul toxumları əkdi → Toxumlar çürüdü."], ans:"A"},
+  {id:8, s:"8. Mətndə əsas fikir nədən ibarətdir?", opts:["Toxunu sandıqda saxlamaq olmaz.","Qərar qəbul edəndə müdrik adamlarla məsləhətləşmək lazımdır.","Ağıllı insan o şəxsdir ki, hır bir tapşırığa yaradıcı yanaşır.","Hər bir oğul atasının tapşırığını yerinə yetirməlidir."], ans:"C"},
+  {id:9, s:"9. Hansı variant \"Padşah tədbirli insan idi.\" fikrini sübut edir?", opts:["Padşah çətiliyə düşəndə müdrik adamla məsləhətləşdi.","Ən yaxşı toxumu kiçik oğluna verdi.","Səfərə çıxarkan ölkənin idarəsini oğullarına tapşırdı.","Məsləhətə ehtiyacı olanda oğulları ilə danışdı."], ans:"A"},
+  {id:10, s:"10. Hansı başlıq mətnin əsas fikrinə uyğundur?", opts:["Fərasətli oğullar","Sarayın gül-çiçəkli bağçası","Padşahın uzaq səfəri","Ədalətli seçim"], ans:"D"},
+  {id:11, s:"11. Mətndə işlənmiş \"qəm dəryasına qərq olmaq\" ifadəsini hansı sözlə əvəz etmək olar?", opts:["sevinmək","hirslənmək","kədərlənmək","fərəhlənmək"], ans:"C"},
+  {id:12, s:"12. Mətnin məzmunundan çıxış edərək uyğunluğu müəyyən edin.\n1.böyük oğul    a.ağıllı\n2.ortancıl oğul  b.məntiqsiz\n3.kiçik oğul    c.hiyləgər", opts:["1-b, 2-c, 3-a","1-a, 2-c, 3-b","1-c, 2-b, 3-a","1-b, 2-a, 3-c"], ans:"D"},
+  {id:13, s:"13. Mətnin nağıl olduğunu göstərən 3 ifadəni seçin.\n1)Günlərin bir günü...\n2)Böyük oğul fikirləşdi...\n3)Ay dolandı, il keçdi, vaxt tamam oldu...\n4)Toxumları görən kimi təəssüfləndi...\n5)Birinci oğul sandığı açdı...\n6)Gül gülü çağırırdı, bülbül bülbülü...", opts:["2,4,5","1,3,6","1,2,5","3,4,6"], ans:"B"},
+  {id:14, s:"14. Mətndəki hadisələrin düzgün ardıcıllığını müəyyən edin.\nI. Padşah kiçik oğlunun xəbərinə sevindi.\nII. Padşah oğullarına toxum verdi.\nIII. Padşah hansı oğlunun taxta çıxacağına qərar verə bilmirdi.\nIV. Padşah müdrik adamla məsləhətləşdi.", opts:["I, II, III, IV","III, IV, II, I","II, III, I, IV","IV, I, I,"], ans:"B"},
+  {id:15, s:"15. Altından xətt çəkilmiş ifadəni hansı sözlə əvəz etmək olar?\n-Ata, bu çiçəklər sənin verdiyin toxumlardan becərmişəm.", opts:["çıxarmışam","qulluq etmişəm","yetişdirmişəm","saxlamışam"], ans:"C"},
+
+  // AZ DİLİ - Akvarium qızılbalıqları (16-30)
+  {id:16, s:"16. Mətndə dünya ölkələri arasında akvarium balıqlarının yayılması ardıcıllığını müəyyənləşdirin.", opts:["Yaponiya - Çin-Amerika","Çin-Amerika – Yaponiya","Amerika-Yaponiya - Çin","Çin-Yaponiya - Amerika"], ans:"D"},
+  {id:17, s:"17. Dekorativ qızılbalıqların hafizəsiz olması fikri nə üçün geniş yayılmışdı?", opts:["Tədqiqatçıların eksperimentlərinə görə","Cizgi filmində balıq obrazının huşsuz təsvir edildiyinə görə","Bu balıqlar çox olduğuna görə","Balıqçıların müşahidələrinə görə"], ans:"B"},
+  {id:18, s:"18. Hansı abzasın məzmunu düzgün göstərilib?", opts:["2-ci abzas - Azərbaycanda akvariumların istehsalı","3-cü abzas - Dekorativ qızılbalıqlar haqqında yanlış fikrin yaranması","4-cü abzas-Balıqların acgözlüyünü təsdiq edən eksperiment","5-ci abzas-Akvarium labirintində hərəkətsiz qalan qızılbalıqlar"], ans:"B"},
+  {id:19, s:"19. Akvarium qızılbalıqları ilə bağlı eksperiment harada keçirildi?\n1.Avstraliya  2.Yaponiya  3.ABŞ  4.Çin", opts:["1,4","2,3","1,3","2,4"], ans:"C"},
+  {id:20, s:"20. Dekorativ qızılbalıqlarla bağlı eksperimentlər hansı məqsədlə aparılırdı?", opts:["Onların yaddaşının olub-olmamasını öyrənmək məqsədilə","Onların şüşə akvariumda nə qədər yaşaya bilməsini öyrənmək məqsədilə","Onların nə ilə qidalanmasını öyrənmək məqsədilə","Onların görmə qabiliyyətini yoxlamaq məqsədilə"], ans:"A"},
+  {id:21, s:"21. Şüşə akvariumların yaradılmasına qədər dekorativ qızılbalıqları harada saxlayırdılar?", opts:["Çaylarda","Dənizlərdə","Hovuzlarda","Okeanlarda"], ans:"C"},
+  {id:22, s:"22. Mətndəki məlumatlardan çıxış etməklə aşağıdakı cümləyə uyğun gələn sözlərdən ibarət variantı seçin.\nEksperimentlərə görə aşkar edildi ki, akvarium qızılbalıqları………… uzun müddət yadda saxlaya bilirlər.", opts:["qoxunu, dadı, rəngi, səsi","səsi, məkanı, vaxtı, rəngi","temperaturu, rəngi, məkanı, qoxunu","səsi, qoxunu, vaxtı, temperaturu"], ans:"B"},
+  {id:23, s:"23. Mətndə hansı suala cavab tapmaq mümkündür?", opts:["Dekorativ qızılbalıqların ömrü nə qədərdir?","Dekorativ qızılbalıqları Azərbaycana kim gətirib?","Dekorativ qızılbalıqlar nə ilə qidalanır?","Dekorativ qızılbalıqlar nə vaxt yaradılıb?"], ans:"D"},
+  {id:24, s:"24. Fikirlərdən biri Amerikalı tədqiqatçıların eksperimentinə aid deyil:", opts:["Akvariumun eyni küncündə balıqlara yem verdilər.","Səs siqnalını gün ərzində eyni vaxtda işə salırdılar.","Akvariumun suyunu tez-tez dəyişdirdilər.","Beş ay fasilə verdilər."], ans:"C"},
+  {id:25, s:"25. Hansı sözün mənası səhv göstərilmişdir?", opts:["dekorativ - bəzək üçün istifadə edilən, gözəl","labirint-mürəkkəb quruluşlu, çoxsaylı otaqlar və dolaşıq dəhlizlərə malik tikili","hafizəsiz iş görərkən çox tələsən, səbirsizlik göstərən","tədqiqatçı müəyyən məqsədlə araşdırma aparan adam, alim."], ans:"C"},
+  {id:26, s:"26. Mətnin birinci cümləsindəki \"adətən\" sözünü hansı sözlə əvəz etmək olar?", opts:["bəzən","əsasən","hətta","başqa"], ans:"B"},
+  {id:27, s:"27. Hansı cümlədə söz birləşməsi məcazi mənada işlədilib?", opts:["\"Nemonun axtarışında\" cizgi filmi balıqlar haqqındadır.","Sonralar kiçik şüşə akvariumlardan istifadə etməyə başlayıblar.","Yenidən siqnal səsi eşidən qızılbalıqlar \"yemək masasının\" başına yığılıblar.","Akvariumlarda xırda, əlvan rəngli, qeyri-adi formalı balıqlar saxlanılır."], ans:"C"},
+  {id:28, s:"28. Dekorativ qızılbalıqları Amerikaya aparan adam hansı peşə sahibi idi?", opts:["Tədqiqatçı","Hərbçi","Səyyah","Tacir"], ans:"B"},
+  {id:29, s:"29. Dekorativ qızılbalıqlarilan eksperimentlər nə ilə nəticələndi?", opts:["Qızılbalıqların uzun müddət ac qala bildiyini müəyyənləşdirdilər.","Qızılbalıqların güclü yaddaşa malik olduğunu sübuta yetirdilər.","Qızılbalıqların nitq bacarığına malik olduğunu öyrəndilər.","Qızılbalıqların akvariumda rənglərinin dəyişdiyini aşkar etdilər."], ans:"B"},
+  {id:30, s:"30. Akvarium qızılbalıqları ilə bağlı səhv fikri seçin.", opts:["Akvarium qızılbalıqları ilk dəfə Çində yetişdirilib.","Dekorativ qızılbalıqların yetişdirilməsi tarixi qədimdir","Akvarium qızılbalıqları ilə bağlı eksperimentlər ABŞ və Avstraliyada aparılmışdır.","Eksperimentlər qızılbalıqların akvariumda uzun müddət qala bildiyini təsdiq etdi"], ans:"D"},
+
+  // RİYAZİYYAT (31-60)
+  {id:31, s:"31. Minliklər sinfi 8, təlliklər sinfi 790 olan ədəd hansıdır?", opts:["8970","8790","8709","8907"], ans:"B"},
+  {id:32, s:"32. Üç ədədin cəmi 784-dür. Toplananlardan biri 324-dür. Digər iki toplanan isə bərабərdir. Həmin toplananların hər biri neçəyə bərабərdir?", opts:["215","340","230","251"], ans:"C"},
+  {id:33, s:"33. 669 : A=223 misalında A-nın yerinə hansı ədəd yazıla bilər?", opts:["4","3","2","5"], ans:"B"},
+  {id:34, s:"34. İki natural ədədin fərqi 1016-dır. Azalan 2024 olarsa, çıxılan neçədir?", opts:["1080","1108","1018","1008"], ans:"D"},
+  {id:35, s:"35. Yük avtomobili I gün 396 km, II gün bundan 3 dəfə az, III gün isə II gündəkindən 2 dəfə çox yol getmişdir. Yük avtomobili 3 gün ərzində cəmi neçə kilometr yol getmişdir?", opts:["792 km","927 km","264 km","729km"], ans:"B"},
+  {id:36, s:"36. Hansı ədədi minliklərə qədər yuvarlaqlaşdırsaq 5000 alınar?", opts:["4134","6634","5596","4642"], ans:"C"},
+  {id:37, s:"37. Xurma bağında 19503 kq xurma 9 kq tutan yeşiklərə qablaşdırıldı. Məhsulu qablaşdırmaq üçün neçə yeşik lazım oldu?", opts:["2764 yeşik","2761 yeşik","2167 yeşik","2617 yeşik"], ans:"A"},
+  {id:38, s:"38. \"Suraxanı\" gəmi-muzeyində bir ay ərzində 89 kişi, 355 qadın və 225 uşaq ekskursiyada oldu. Bir ayda cəmi neçə nəfər Suraxanı \"gəmi-muzeyi\"ndə ekskursiyada oldu?", opts:["869 nəfər","779 nəfər","669 nəfər","569 nəfər"], ans:"C"},
+  {id:39, s:"39. Ədədlərin düzülüş qaydasını müəyyən edin. Növbəti ədəd hansıdır?\n274, 295, 316, 337,...", opts:["348","538","358","583"], ans:"C"},
+  {id:40, s:"40. Aşağıdakılardan hansı 16-nın böləni deyil?", opts:["2","6","4","8"], ans:"B"},
+  {id:41, s:"41. Sayalı nənə 36 L südün 3/9 hissəsindən pendir, qalanından isə yağ hazırladı. Sayalı nənə yağ hazırlamaq üçün neçə litr süddən istifadə etdi?", opts:["24 L","4 L","12 L","15L"], ans:"A"},
+  {id:42, s:"42. İki ardıcıl tək ədədin cəmi 48-dir. Kiçik ədəd neçədir?", opts:["25","23","22","21"], ans:"B"},
+  {id:43, s:"43. Vaqifin boyunun hündürlüyü 1 m 74 sm-dir. Onun boyu 2 m-dan nə qədər azdır?", opts:["6 sm","26 sm","36 sm","16 sm"], ans:"B"},
+  {id:44, s:"44. Minik avtomobili 100 km yola 16 L benzin işlədir. Bu hesabla minik avtomobili Bakıdan Balakənə getmək üçün 400 km yola neçə litr benzin işlədər?", opts:["64 L","61 L","46 L","41 L"], ans:"A"},
+  {id:45, s:"45. Düzgün cavabı tapın: 7km+7m+700 sm+0mm", opts:["7077 m","7014 m","7140 m","7707 m"], ans:"A"},
+  {id:46, s:"46. Fatimə hər gün yarım litr süd içir. O, ayda neçə litr süd içər? (1 ay 30 gün)", opts:["30 L","10 L","20 L","15 L"], ans:"D"},
+  {id:47, s:"47. Fəqanın 4 yaşı var. Onun yaşı atasının yaşının 1/8 hissəsinə bərабərdir. Fəqan atasından neçə yaş kiçikdir?", opts:["32","12","24","28"], ans:"D"},
+  {id:48, s:"48. 120 L limonadın yarısı 500 ml-lik qablara, yarısını da 250 ml-lik qablar doldurdular. Cəmi neçə qab dolduruldu?", opts:["220","200","360","320"], ans:"A"},
+  {id:49, s:"49. Bir ədəd şalvar neçə manatdır?", opts:["255 manat","960 manat.","35 manat","30 manat"], ans:"D", tableQ:true},
+  {id:50, s:"50. Bu mağazadan bir köynək, bir ayaqqabı, bir papaq almaq üçün neçə manat ödəmək lazımdır?", opts:["154 manat","2260 manat","100 manat","226 manat"], ans:"D", tableQ:true},
+  {id:51, s:"51. Bu mağazadan iki cüt ayaqqabı, bir kostyum, bir don almaq üçün neçə manat pulun olmalıdır?", opts:["1820 manat","305 manat","245 manat","350 manat"], ans:"A", tableQ:true},
+  {id:52, s:"52. Kvadratın perimetri 32 sm olarsa, tərəflərinin uzunluğu neçə santimetrdir?", opts:["7 sm","9 sin","8 sm","6 sm"], ans:"C"},
+  {id:53, s:"53. Bölən 9, qismət 4, qalıq 5-dir. Bölünənin 2 qatı neçədir?", opts:["76","68","62","82"], ans:"D"},
+  {id:54, s:"54. 60°-li bucaq açıq bucağın hansı hissəsini təşkil edir?", opts:["1/6","1/2","1/3","2/3"], ans:"C"},
+  {id:55, s:"55. Su qabı 900 ml su tutur. Qabın 1/3 hissəsi su ilə doludur. Qabı doldurmaq üçün nə qədər milli litr su əlavə etmək lazımdır?", opts:["300 ml","1200 ml","600 ml","450 ml"], ans:"C"},
+  {id:56, s:"56. Tərəzinin bir gözündə 4000 q banan var. Tərəzinin tarazlıqda olması üçün digər gözünə hansı çəki daşları qoyulmalıdır?", opts:["3 kq və 1 kq","2 kq və 3 kq","1 kq və 2 kq","1 kq, 2 kq və 3 kq"], ans:"A"},
+  {id:57, s:"57. Aşağıdakı ifadələrdən hansı doğrudur?", opts:["89 ədədi 9-a tam bölünür.","Bütün ikirəqəmli ədədlər 100-dən kiçikdir.","99-dan böyük ikirəqəmli ədədlər var.","Ən böyük üçrəqəmli ədəd 399-dur."], ans:"B"},
+  {id:58, s:"58. 35129 ədədində 5 rəqəminin mərtəbə qiyməti neçədir?", opts:["50000","5000","500","5"], ans:"B"},
+  {id:59, s:"59. Hesablayın: 47 x 32", opts:["1504","1514","1544","1554"], ans:"C"},
+  {id:60, s:"60. İki toplanandan birinə 98, digərinə isə 27 əlavə edilsə, cəm nə qədər artar?", opts:["71","27","98","125"], ans:"D"},
+];
+
+const tableHTML = `
+<table class="q-table">
+  <thead><tr><th>ƏŞYALAR</th><th>SAYI</th><th>CƏMİ QİYMƏTİ</th></tr></thead>
+  <tbody>
+    <tr><td>Ayaqqabı</td><td>13</td><td>780</td></tr>
+    <tr><td>Köynək</td><td>25</td><td>1000</td></tr>
+    <tr><td>Şalvar</td><td>32</td><td>960</td></tr>
+    <tr><td>Don</td><td>10</td><td>500</td></tr>
+    <tr><td>Kostyum</td><td>4</td><td>540</td></tr>
+    <tr><td>Papaq</td><td>9</td><td>486</td></tr>
+  </tbody>
+</table>`;
+
+// ===================== STATE =====================
+let answers = {};
+let timerInterval = null;
+let timeLeft = 150 * 60;
+let testStarted = false;
+
+// ===================== BUILD UI =====================
+function buildQuestions() {
+  const main = document.getElementById('questions-main');
+  main.innerHTML = '';
+
+  // Section 1
+  main.innerHTML += `<div class="section-title"><span class="badge">Fənn</span><h2>Azərbaycan Dili</h2></div>`;
+  main.innerHTML += `<div class="passage">${passage1}</div>`;
+  for(let i=0;i<15;i++) renderQ(questions[i], main);
+
+  main.innerHTML += `<div class="section-title"><span class="badge">Fənn</span><h2>Azərbaycan Dili – II Mətn</h2></div>`;
+  main.innerHTML += `<div class="passage">${passage2}</div>`;
+  for(let i=15;i<30;i++) renderQ(questions[i], main);
+
+  // Section 2
+  main.innerHTML += `<div class="section-title"><span class="badge">Fənn</span><h2>Riyaziyyat</h2></div>`;
+  // Table for 49-51
+  for(let i=30;i<60;i++){
+    if(i===48){
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<div style="background:#fff;border-radius:var(--radius);padding:16px 20px;margin-bottom:14px;box-shadow:var(--shadow)"><p style="font-weight:700;font-size:.93rem;margin-bottom:10px">49-51-ci test tapşırıqlarını aşağıda verilmiş cədvələ əsasən asasan sualları cavablandırın.</p>${tableHTML}</div>`;
+      main.appendChild(wrapper);
+    }
+    renderQ(questions[i], main);
+  }
+}
+
+function renderQ(q, container) {
+  const letters = ['A','B','C','D'];
+  const opts = q.opts.map((o,i)=>`
+    <label class="opt" id="opt_${q.id}_${letters[i]}" onclick="selectOpt(${q.id},'${letters[i]}')">
+      <input type="radio" name="q${q.id}" value="${letters[i]}">
+      <span class="opt-letter">${letters[i]}</span>
+      <span>${o}</span>
+    </label>`).join('');
+
+  const div = document.createElement('div');
+  div.className = 'q-card';
+  div.id = `qcard_${q.id}`;
+  div.innerHTML = `
+    <div class="q-num">Sual ${q.id}</div>
+    <div class="q-text">${q.s.replace(/\n/g,'<br>')}</div>
+    <div class="options">${opts}</div>`;
+  container.appendChild(div);
+}
+
+// ===================== INTERACTION =====================
+function selectOpt(qid, letter) {
+  if(!testStarted) return;
+  const prev = answers[qid];
+  if(prev) document.getElementById(`opt_${qid}_${prev}`)?.classList.remove('selected');
+  answers[qid] = letter;
+  document.getElementById(`opt_${qid}_${letter}`)?.classList.add('selected');
+  document.getElementById(`qcard_${qid}`)?.classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(answers).length;
+  document.getElementById('progress-count').textContent = count+'/60';
+  document.getElementById('prog-fill').style.width = (count/60*100)+'%';
+}
+
+// ===================== TIMER =====================
+function startTimer() {
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    const h = Math.floor(timeLeft/3600);
+    const m = Math.floor((timeLeft%3600)/60);
+    const s = timeLeft%60;
+    const box = document.getElementById('timer-box');
+    box.textContent = `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if(timeLeft<=300) box.classList.add('warning');
+    if(timeLeft<=0){ clearInterval(timerInterval); submitTest(true); }
+  },1000);
+}
+
+// ===================== START =====================
+function startTest() {
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('test-area').style.display='block';
+  buildQuestions();
+  testStarted = true;
+  startTimer();
+  window.scrollTo(0,0);
+}
+
+// ===================== SUBMIT =====================
+function submitTest(auto=false) {
+  if(!auto && !confirm('İmtahanı təslim etmək istəyirsiniz?')) return;
+  clearInterval(timerInterval);
+  testStarted = false;
+
+  let correct=0, wrong=0, blank=0;
+  questions.forEach(q=>{
+    const userAns = answers[q.id];
+    if(!userAns){ blank++; return; }
+    if(userAns===q.ans){ correct++; }
+    else { wrong++; }
+    // Show answers
+    const letters=['A','B','C','D'];
+    letters.forEach(l=>{
+      const el = document.getElementById(`opt_${q.id}_${l}`);
+      if(!el) return;
+      el.style.pointerEvents='none';
+      if(l===q.ans) el.classList.add('correct-ans');
+      else if(l===userAns && userAns!==q.ans) el.classList.add('wrong-ans');
+    });
+  });
+
+  const pct = Math.round(correct/60*100);
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = wrong;
+  document.getElementById('res-blank').textContent = blank;
+  document.getElementById('res-score').textContent = pct+'%';
+  document.getElementById('res-detail').textContent = `60 sualdan ${correct} düzgün cavab`;
+
+  let emoji='😊', title='Yaxşı nəticə!';
+  if(pct>=90){emoji='🏆';title='Əla! Çox gözəl nəticə!';}
+  else if(pct>=70){emoji='🌟';title='Yaxşı nəticə!';}
+  else if(pct>=50){emoji='📚';title='Orta nəticə, daha çox çalış!';}
+  else {emoji='💪';title='Məyus olma, daha çox öyrən!';}
+
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('result-modal').classList.add('show');
+}
+
+// ===================== RETRY =====================
+function retryTest() {
+  answers={};
+  timeLeft=150*60;
+  document.getElementById('timer-box').textContent='2:30:00';
+  document.getElementById('timer-box').classList.remove('warning');
+  document.getElementById('result-modal').classList.remove('show');
+  document.getElementById('progress-count').textContent='0/60';
+  document.getElementById('prog-fill').style.width='0%';
+  buildQuestions();
+  testStarted=true;
+  startTimer();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
